@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react'
-import { initialize } from '@caldwell619/family-tree'
+import { initialize } from '@caldwell619/family-tree/dist/class/index'
 
 export const App: FC = () => {
   useEffect(() => {
