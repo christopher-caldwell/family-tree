@@ -1,0 +1,31 @@
+{
+  "name": "demo",
+  "scripts": {
+    "type-check": "../node_modules/typescript/bin/tsc --noEmit",
+    "format": "../node_modules/prettier/bin-prettier.js --write src",
+    "lint": "../node_modules/eslint/bin/eslint.js --ext .ts,.tsx src",
+    "dev": "vite --port 3002",
+    "build": "../node_modules/typescript/bin/tsc --noEmit && vite build",
+    "analyze": "ANALYZE=true yarn build"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@mui/material": "^5.10.8",
+    "@types/react-dom": "^18.0.6",
+    "@vitejs/plugin-react": "^2.1.0",
+    "eslint": "^8.24.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^4.0.8",
+    "rollup-plugin-visualizer": "^5.8.2",
+    "vite": "^3.1.6",
+    "vite-plugin-checker": "^0.5.1"
+  }
+}
