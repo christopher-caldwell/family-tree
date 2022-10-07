@@ -1,3 +1,4 @@
+// This breaks the tree, so keeping it here for now
 interface Config {
   width: number
   height: number
@@ -251,7 +252,7 @@ export class Tree<TData> {
    * @param context The 2-d context of a canvas html element.
    * @param tree The tree that will be drawn.
    */
-  draw(context: any, tree: any) {
+  draw(context: CanvasRenderingContext2D, tree: Tree<TData>) {
     var config = {
         maxDepth: 100,
         levelSeparation: 40,
@@ -270,7 +271,7 @@ export class Tree<TData> {
        * @param tree The tree.
        * @param level The current vertical level of the tree.
        */
-      setLevelHeight = function (tree: any, level: any) {
+      setLevelHeight = function (tree: Tree<TData>, level: any) {
         maxLevelHeight[level] = tree.height
       },
       /**
@@ -278,7 +279,7 @@ export class Tree<TData> {
        * @param tree The tree.
        * @param level The current vertical level of the tree.
        */
-      setLevelWidth = function (tree: any, level: any) {
+      setLevelWidth = function (tree: Tree<TData>, level: any) {
         maxLevelWidth[level] = tree.width
       },
       /**
@@ -286,7 +287,7 @@ export class Tree<TData> {
        * @param tree The specified tree
        * @param level The vertical level of the tree.
        */
-      setNeighbors = function (tree: any, level: any) {
+      setNeighbors = function (tree: Tree<TData>, level: any) {
         tree.leftNeighbor = previousLevelTree[level]
         if (tree.leftNeighbor) tree.leftNeighbor.rightNeighbor = tree
         previousLevelTree[level] = tree
@@ -299,7 +300,7 @@ export class Tree<TData> {
        * @returns {*} The leftmost descendant if found, or null.
        */
       // @ts-expect-error TS(7023): 'getLeftMost' implicitly has return type 'any' bec... Remove this comment to see the full error message
-      getLeftMost = function (tree: any, level: any, maxlevel: any) {
+      getLeftMost = function (tree: Tree<TData>, level: any, maxlevel: any) {
         if (level >= maxlevel) return tree
         if (tree.numChildren() === 0) return null
         var n = tree.numChildren()
@@ -316,7 +317,7 @@ export class Tree<TData> {
        * @param tree The specified tree.
        * @returns {number} The width of the tree.
        */
-      getNodeSize = function (tree: any) {
+      getNodeSize = function (tree: Tree<TData>) {
         return tree.width
       },
       /**
@@ -325,20 +326,20 @@ export class Tree<TData> {
        * @param tree
        * @param level
        */
-      apportion = function (tree: any, level: any) {
+      apportion = function (tree: Tree<TData>, level: any) {
         var firstChild = tree.getFirstChild(),
-          firstChildLeftNeighbor = firstChild.leftNeighbor,
+          firstChildLeftNeighbor = firstChild?.leftNeighbor,
           j = 1
         for (var k = config.maxDepth - level; firstChild != null && firstChildLeftNeighbor != null && j <= k; ) {
           var modifierSumRight = 0
           var modifierSumLeft = 0
-          var rightAncestor = firstChild
-          var leftAncestor = firstChildLeftNeighbor
+          var rightAncestor: Tree<TData> | null = firstChild
+          var leftAncestor: Tree<TData> | null = firstChildLeftNeighbor
           for (var l = 0; l < j; l++) {
-            rightAncestor = rightAncestor.parentTree
-            leftAncestor = leftAncestor.parentTree
-            modifierSumRight += rightAncestor.modifier
-            modifierSumLeft += leftAncestor.modifier
+            rightAncestor = rightAncestor?.parentTree || null
+            leftAncestor = leftAncestor?.parentTree || null
+            modifierSumRight += rightAncestor?.modifier || 0
+            modifierSumLeft += leftAncestor?.modifier || 0
           }
           var totalGap =
             firstChildLeftNeighbor.prelim +
@@ -347,18 +348,20 @@ export class Tree<TData> {
             config.subtreeSeparation -
             (firstChild.prelim + modifierSumRight)
           if (totalGap > 0) {
-            var subtreeAux = tree
+            var subtreeAux: Tree<TData> | null = tree
             var numSubtrees = 0
             for (; subtreeAux != null && subtreeAux != leftAncestor; subtreeAux = subtreeAux.getLeftSibling()) {
               numSubtrees++
             }
             if (subtreeAux != null) {
-              var subtreeMoveAux = tree
+              var subtreeMoveAux: Tree<TData> | null = tree
               var singleGap = totalGap / numSubtrees
-              for (; subtreeMoveAux != leftAncestor; subtreeMoveAux = subtreeMoveAux.getLeftSibling()) {
-                subtreeMoveAux.prelim += totalGap
-                subtreeMoveAux.modifier += totalGap
-                totalGap -= singleGap
+              for (; subtreeMoveAux != leftAncestor; subtreeMoveAux = subtreeMoveAux?.getLeftSibling() || null) {
+                if (subtreeMoveAux?.prelim && subtreeMoveAux?.modifier) {
+                  subtreeMoveAux.prelim += totalGap
+                  subtreeMoveAux.modifier += totalGap
+                  totalGap -= singleGap
+                }
               }
             }
           }
@@ -380,7 +383,7 @@ export class Tree<TData> {
        * @param tree
        * @param level
        */
-      firstWalk = function (tree: any, level: any) {
+      firstWalk = function (tree: Tree<TData>, level: any) {
         var leftSibling = null
         tree.xPos = 0
         tree.yPos = 0
@@ -399,7 +402,9 @@ export class Tree<TData> {
         } else {
           var n = tree.numChildren()
           for (var i = 0; i < n; i++) {
-            firstWalk(tree.getChildAt(i), level + 1)
+            const targetTree = tree.getChildAt(i)
+            if (!targetTree) continue
+            firstWalk(targetTree, level + 1)
           }
           var midPoint = tree.getChildrenCenter()
           midPoint -= getNodeSize(tree) / 2
@@ -421,16 +426,14 @@ export class Tree<TData> {
        * @param X The X value of the tree.
        * @param Y The Y value of the tree.
        */
-      secondWalk = function (tree: any, level: any, X: any, Y: any) {
+      secondWalk = function (tree: Tree<TData>, level: any, X: any, Y: any) {
         tree.xPos = rootXOffset + tree.prelim + X
         tree.yPos = rootYOffset + Y
-        if (tree.numChildren())
-          secondWalk(
-            tree.getFirstChild(),
-            level + 1,
-            X + tree.modifier,
-            Y + maxLevelHeight[level] + config.levelSeparation
-          )
+        if (tree.numChildren()) {
+          const targetTree = tree.getFirstChild()
+          if (!targetTree) return
+          secondWalk(targetTree, level + 1, X + tree.modifier, Y + maxLevelHeight[level] + config.levelSeparation)
+        }
         var rightSibling = tree.getRightSibling()
         if (rightSibling) secondWalk(rightSibling, level, X, Y)
       },
@@ -438,7 +441,7 @@ export class Tree<TData> {
        * Assign X,Y position values to the tree and it's descendants.
        * @param tree The tree to be positioned.
        */
-      positionTree = function (tree: any) {
+      positionTree = function (tree: Tree<TData>) {
         maxLevelHeight = []
         maxLevelWidth = []
         previousLevelTree = []
@@ -449,7 +452,7 @@ export class Tree<TData> {
         rootXOffset = Math.abs(getMinX(tree)) //Align to left
         secondWalk(tree, 0, 0, 0)
       },
-      getMinX = function (tree: any) {
+      getMinX = function (tree: Tree<TData>) {
         // TODO: Check this, was TREE
         var nodes = tree.getNodeList(tree)
         var min = 0
@@ -462,7 +465,7 @@ export class Tree<TData> {
        * Draw the tree and it's descendants on the canvass.
        * @param tree The tree that will be drawn.
        */
-      drawNode = function (tree: any) {
+      drawNode = function (tree: Tree<TData>) {
         var x = tree.xPos,
           y = tree.yPos,
           width = tree.width,
@@ -484,17 +487,15 @@ export class Tree<TData> {
         context.strokeText(text, x + width / 2 - textWidth / 2, y + height / 2, width)
         context.strokeStyle = 'black'
         if (tree.children.length > 0) {
+          const firstChild = tree.getFirstChild()
+          const lastChild = tree.getLastChild()
+          if (!firstChild || !lastChild) return
+
           context.beginPath()
           context.moveTo(x + width / 2, y + height)
           context.lineTo(x + width / 2, y + height + config.levelSeparation / 2)
-          context.moveTo(
-            tree.getFirstChild().xPos + tree.getFirstChild().width / 2,
-            y + height + config.levelSeparation / 2
-          )
-          context.lineTo(
-            tree.getLastChild().xPos + tree.getLastChild().width / 2,
-            y + height + config.levelSeparation / 2
-          )
+          context.moveTo(firstChild.xPos + firstChild.width / 2, y + height + config.levelSeparation / 2)
+          context.lineTo(lastChild.xPos + lastChild.width / 2, y + height + config.levelSeparation / 2)
           context.stroke()
         }
         if (tree.parentId != -1) {
@@ -504,7 +505,9 @@ export class Tree<TData> {
           context.stroke()
         }
         for (var i = 0; tree.numChildren() > 0 && i < tree.numChildren(); i++) {
-          drawNode(tree.getChildAt(i))
+          const targetChild = tree.getChildAt(i)
+          if (!targetChild) continue
+          drawNode(targetChild)
         }
       }
 

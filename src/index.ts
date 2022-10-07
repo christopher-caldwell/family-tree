@@ -1,111 +1,131 @@
 import { Tree } from './tree'
 
-export const initialize = (canvasId = 'canvas') => {
-  const canvas = document.getElementById(canvasId)
-  // TODO: check if element is canvas
+export const getTree = <TData>(canvasId = 'canvas') => {
+  const canvas = document.getElementById(canvasId) as HTMLCanvasElement
   if (!canvas) throw new Error('Cannot find canvas element')
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
   const context = canvas.getContext('2d')
-  const tree = new Tree({ text: 'Maekar I' })
+  if (!context) throw new Error('Cannot find canvas context')
+  const tree = new Tree<TData>({ text: 'Maekar I' })
+
   let nodes = tree.getNodeList(tree)
   let currNode = tree
 
-  // TODO: Move to exported logic handlers
-  const add_child_button = document.getElementById('add_child')
-  const remove_node = document.getElementById('remove_node')
-  const zoom_in = document.getElementById('zoom_in')
-  const zoom_out = document.getElementById('zoom_out')
-
-  canvas.addEventListener(
-    'click',
-    event => {
-      const x = event.pageX - canvas.offsetLeft
-      const y = event.pageY - canvas.offsetTop
-      for (let i = 0; i < nodes.length; i++) {
-        if (
-          x > nodes[i].xPos &&
-          y > nodes[i].yPos &&
-          x < nodes[i].xPos + nodes[i].width &&
-          y < nodes[i].yPos + nodes[i].height
-        ) {
-          currNode.selected(false)
-          nodes[i].selected(true)
-          currNode = nodes[i]
-          tree.clear(context)
-          tree.draw(context, tree)
-          updatePage(currNode)
-          break
-        }
+  /** Canvas onClick */
+  const onClick = (event: MouseEvent) => {
+    const x = event.pageX - canvas.offsetLeft
+    const y = event.pageY - canvas.offsetTop
+    for (let i = 0; i < nodes.length; i++) {
+      if (
+        x > nodes[i].xPos &&
+        y > nodes[i].yPos &&
+        x < nodes[i].xPos + nodes[i].width &&
+        y < nodes[i].yPos + nodes[i].height
+      ) {
+        currNode.selected(false)
+        nodes[i].selected(true)
+        currNode = nodes[i]
+        tree.clear(context)
+        tree.draw(context, tree)
+        updatePage(currNode)
+        break
       }
-    },
-    false
-  )
+    }
+  }
 
-  canvas.addEventListener(
-    'mousemove',
-    event => {
-      const x = event.pageX - canvas.offsetLeft
-      const y = event.pageY - canvas.offsetTop
-      for (let i = 0; i < nodes.length; i++) {
-        if (
-          x > nodes[i].xPos &&
-          y > nodes[i].yPos &&
-          x < nodes[i].xPos + nodes[i].width &&
-          y < nodes[i].yPos + nodes[i].height
-        ) {
-          canvas.style.cursor = 'pointer'
-          break
-        } else {
-          canvas.style.cursor = 'auto'
-        }
+  const onMouseMove = (event: MouseEvent) => {
+    const x = event.pageX - canvas.offsetLeft
+    const y = event.pageY - canvas.offsetTop
+    for (let i = 0; i < nodes.length; i++) {
+      if (
+        x > nodes[i].xPos &&
+        y > nodes[i].yPos &&
+        x < nodes[i].xPos + nodes[i].width &&
+        y < nodes[i].yPos + nodes[i].height
+      ) {
+        canvas.style.cursor = 'pointer'
+        break
+      } else {
+        canvas.style.cursor = 'auto'
       }
-    },
-    false
-  )
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  add_child_button.addEventListener('click', () => {
+    }
+  }
+
+  const onAdd = () => {
     currNode.addChild(new Tree({ text: 'Child of ' + currNode.text }))
     tree.clear(context)
     nodes = tree.getNodeList(tree)
     tree.draw(context, tree)
-  })
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  remove_node.addEventListener('click', () => {
+  }
+
+  const onRemove = () => {
     tree.destroy(currNode)
     tree.clear(context)
     nodes = tree.getNodeList(tree)
     tree.draw(context, tree)
-  })
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  zoom_in.addEventListener('click', () => {
+  }
+
+  /**
+   * Zooms in the tree
+   * @param step Optional number to determine how far each click gets zoomed. Default: `1.05` zooms 5% each time
+   */
+  const onZoomIn = (step: number = 1.05) => {
     for (var i = 0; i < nodes.length; i++) {
-      nodes[i].width *= 1.05
-      nodes[i].height *= 1.05
+      nodes[i].width *= step
+      nodes[i].height *= step
     }
-    tree.config.width *= 1.05
-    tree.config.height *= 1.05
+    tree.config.width *= step
+    tree.config.height *= step
     tree.clear(context)
     tree.draw(context, tree)
-  })
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  zoom_out.addEventListener('click', () => {
+  }
+
+  /**
+   * Zooms out the tree
+   * @param step Optional number to determine how far each click gets zoomed. Default: `0.95` zooms 5% each time
+   */
+  const onZoomOut = (step: number = 0.95) => {
     for (let i = 0; i < nodes.length; i++) {
-      nodes[i].width = nodes[i].width * 0.95
-      nodes[i].height = nodes[i].height * 0.95
+      nodes[i].width = nodes[i].width * step
+      nodes[i].height = nodes[i].height * step
     }
     tree.config.width *= 0.95
     tree.config.height *= 0.95
     tree.clear(context)
     tree.draw(context, tree)
-  })
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  context.canvas.width = document.getElementById('main').offsetWidth
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  context.canvas.height = document.getElementById('main').offsetHeight
-  populateDummyData(tree)
-  nodes = tree.getNodeList(tree)
-  tree.draw(context, tree)
-  return tree
+  }
+
+  const initialize = () => {
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
+    context.canvas.width = document.getElementById('main').offsetWidth
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
+    context.canvas.height = document.getElementById('main').offsetHeight
+    populateDummyData(tree)
+    nodes = tree.getNodeList(tree)
+    tree.draw(context, tree)
+  }
+
+  return {
+    tree,
+    context,
+    initialize,
+    handlers: {
+      onClick,
+      onAdd,
+      onZoomIn,
+      onZoomOut,
+      onMouseMove,
+      onRemove
+    }
+  }
+}
+
+export interface Handlers {
+  onClick: (event: MouseEvent) => void
+  onAdd: () => void
+  onZoomIn: (step?: number) => void
+  onZoomOut: (step?: number) => void
+  onMouseMove: (event: MouseEvent) => void
+  onRemove: () => void
 }
 
 export const updatePage = (tree: any) => {
