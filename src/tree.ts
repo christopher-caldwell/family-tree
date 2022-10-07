@@ -12,7 +12,16 @@ var TREE = (function () {
             color: "black",
             bgcolor: "white"
         },
-        Tree = function (text, parentId, width, height, color, bgcolor, treeData) {
+        Tree = function(
+            this: any,
+            text: any,
+            parentId: any,
+            width: any,
+            height: any,
+            color: any,
+            bgcolor: any,
+            treeData: any
+        ) {
             this.uid = uID += 1;
             this.parentId = parentId || -1;
             this.text = text;
@@ -43,7 +52,7 @@ var TREE = (function () {
      * Sets the text color of the tree node.
      * @param color The color to change it to.
      */
-    Tree.prototype.setColor = function (color) {
+    Tree.prototype.setColor = function (color: any) {
         this.color = color;
     };
 
@@ -51,7 +60,7 @@ var TREE = (function () {
      * Sets the background color of the tree node.
      * @param color The color to change it to.
      */
-    Tree.prototype.setbgColor = function (color) {
+    Tree.prototype.setbgColor = function (color: any) {
         this.bgcolor = color;
     };
 
@@ -59,7 +68,7 @@ var TREE = (function () {
      * Visually changes the style of the node if it is 'selected'.
      * @param bool A true or false value representing if node is selected or not.
      */
-    Tree.prototype.selected = function (bool) {
+    Tree.prototype.selected = function (bool: any) {
         if (bool) {
             this.setColor("white");
             this.setbgColor("red");
@@ -98,7 +107,7 @@ var TREE = (function () {
      * @param index The specified index.
      * @returns {*} The child if found or null.
      */
-    Tree.prototype.getChildAt = function (index) {
+    Tree.prototype.getChildAt = function (index: any) {
         return this.children[index];
     };
 
@@ -107,7 +116,7 @@ var TREE = (function () {
      * @param id The UID to search for.
      * @returns {*} The child if found or null.
      */
-    Tree.prototype.getChild = function (id) {
+    Tree.prototype.getChild = function (id: any) {
         var i;
         for (i = 0; i < this.children.length; i++) {
             if (this.children[i].uid === id) {
@@ -146,7 +155,7 @@ var TREE = (function () {
      * Adds a tree node to the children to this tree.
      * @param tree The tree to be added.
      */
-    Tree.prototype.addChild = function (tree) {
+    Tree.prototype.addChild = function (tree: any) {
         tree.parentTree = this;
         tree.parentId = this.uid;
         this.children.push(tree);
@@ -157,7 +166,7 @@ var TREE = (function () {
      * @param id The UID to search for.
      * @returns {*} The found tree node or null if not found.
      */
-    Tree.prototype.getDescendent = function (id) {
+    Tree.prototype.getDescendent = function (id: any) {
         var children = this.children;
         var found;
         if (this.getChild(id)) {
@@ -182,7 +191,8 @@ var TREE = (function () {
          * @param text The textual representation of the tree.
          * @returns {Tree} The newly created tree.
          */
-        create: function (text) {
+        create: function (text: any) {
+            // @ts-expect-error TS(2554): Expected 7 arguments, but got 1.
             return new Tree(text);
         },
 
@@ -191,7 +201,7 @@ var TREE = (function () {
          * descendants from an existing tree.
          * @param tree The tree to be removed.
          */
-        destroy: function (tree) {
+        destroy: function (tree: any) {
             if (!tree.parentTree) {
                 alert("Removing root node not supported at this time");
                 return;
@@ -210,7 +220,8 @@ var TREE = (function () {
          * @param tree The tree.
          * @returns {Array} An array of tree nodes.
          */
-        getNodeList: function (tree) {
+        // @ts-expect-error TS(7023): 'getNodeList' implicitly has return type 'any' bec... Remove this comment to see the full error message
+        getNodeList: function (tree: any) {
             var nodeList = [];
             nodeList.push(tree);
             for (var i = 0; i < tree.numChildren(); i++) {
@@ -223,7 +234,7 @@ var TREE = (function () {
          * Clears the canvas.
          * @param context The 2-d context of an html canvas element.
          */
-        clear: function (context) {
+        clear: function (context: any) {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         },
 
@@ -232,7 +243,7 @@ var TREE = (function () {
          * @param context The 2-d context of a canvas html element.
          * @param tree The tree that will be drawn.
          */
-        draw: function (context, tree) {
+        draw: function (context: any, tree: any) {
             var config = {
                     maxDepth: 100,
                     levelSeparation: 40,
@@ -241,9 +252,9 @@ var TREE = (function () {
                     topXAdjustment: 0,
                     topYAdjustment: 20
                 },
-                maxLevelHeight = [],
+                maxLevelHeight: any = [],
                 maxLevelWidth = [],
-                previousLevelTree = [],
+                previousLevelTree: any = [],
                 rootXOffset = 0,
                 rootYOffset = 0,
 
@@ -252,7 +263,7 @@ var TREE = (function () {
                  * @param tree The tree.
                  * @param level The current vertical level of the tree.
                  */
-                setLevelHeight = function (tree, level) {
+                setLevelHeight = function (tree: any, level: any) {
                     maxLevelHeight[level] = tree.height;
                 },
 
@@ -261,7 +272,7 @@ var TREE = (function () {
                  * @param tree The tree.
                  * @param level The current vertical level of the tree.
                  */
-                setLevelWidth = function (tree, level) {
+                setLevelWidth = function (tree: any, level: any) {
                     maxLevelWidth[level] = tree.width;
                 },
 
@@ -270,7 +281,7 @@ var TREE = (function () {
                  * @param tree The specified tree
                  * @param level The vertical level of the tree.
                  */
-                setNeighbors = function (tree, level) {
+                setNeighbors = function (tree: any, level: any) {
                     tree.leftNeighbor = previousLevelTree[level];
                     if (tree.leftNeighbor)
                         tree.leftNeighbor.rightNeighbor = tree;
@@ -284,12 +295,14 @@ var TREE = (function () {
                  * @param maxlevel The maximum level in which to stop searching.
                  * @returns {*} The leftmost descendant if found, or null.
                  */
-                getLeftMost = function (tree, level, maxlevel) {
+                // @ts-expect-error TS(7023): 'getLeftMost' implicitly has return type 'any' bec... Remove this comment to see the full error message
+                getLeftMost = function (tree: any, level: any, maxlevel: any) {
                     if (level >= maxlevel) return tree;
                     if (tree.numChildren() === 0) return null;
                     var n = tree.numChildren();
                     for (var i = 0; i < n; i++) {
                         var iChild = tree.getChildAt(i);
+                        // @ts-expect-error TS(7022): 'leftmostDescendant' implicitly has type 'any' bec... Remove this comment to see the full error message
                         var leftmostDescendant = getLeftMost(iChild, level + 1, maxlevel);
                         if (leftmostDescendant !== null)
                             return leftmostDescendant;
@@ -302,7 +315,7 @@ var TREE = (function () {
                  * @param tree The specified tree.
                  * @returns {number} The width of the tree.
                  */
-                getNodeSize = function (tree) {
+                getNodeSize = function (tree: any) {
                     return tree.width;
                 },
 
@@ -312,7 +325,7 @@ var TREE = (function () {
                  * @param tree
                  * @param level
                  */
-                apportion = function (tree, level) {
+                apportion = function (tree: any, level: any) {
                     var firstChild = tree.getFirstChild(),
                         firstChildLeftNeighbor = firstChild.leftNeighbor,
                         j = 1;
@@ -363,7 +376,7 @@ var TREE = (function () {
                  * @param tree
                  * @param level
                  */
-                firstWalk = function (tree, level) {
+                firstWalk = function (tree: any, level: any) {
                     var leftSibling = null;
                     tree.xPos = 0;
                     tree.yPos = 0;
@@ -408,7 +421,7 @@ var TREE = (function () {
                  * @param X The X value of the tree.
                  * @param Y The Y value of the tree.
                  */
-                secondWalk = function (tree, level, X, Y) {
+                secondWalk = function (tree: any, level: any, X: any, Y: any) {
                     tree.xPos = rootXOffset + tree.prelim + X;
                     tree.yPos = rootYOffset + Y;
                     if (tree.numChildren())
@@ -422,7 +435,7 @@ var TREE = (function () {
                  * Assign X,Y position values to the tree and it's descendants.
                  * @param tree The tree to be positioned.
                  */
-                positionTree = function (tree) {
+                positionTree = function (tree: any) {
                     maxLevelHeight = [];
                     maxLevelWidth = [];
                     previousLevelTree = [];
@@ -434,7 +447,7 @@ var TREE = (function () {
                     secondWalk(tree, 0, 0, 0);
                 },
 
-                getMinX = function (tree) {
+                getMinX = function (tree: any) {
                     var nodes = TREE.getNodeList(tree);
                     var min = 0;
                     for (var i = 0; i < nodes.length; i++){
@@ -448,7 +461,7 @@ var TREE = (function () {
                  * Draw the tree and it's descendants on the canvass.
                  * @param tree The tree that will be drawn.
                  */
-                drawNode = function (tree) {
+                drawNode = function (tree: any) {
                     var x = tree.xPos,
                         y = tree.yPos,
                         width = tree.width,

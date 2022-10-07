@@ -2,6 +2,7 @@
 var maintree;
 function initialize() {
     var canvas = document.getElementById("canvas"),
+        // @ts-expect-error TS(2531): Object is possibly 'null'.
         context = canvas.getContext("2d"),
         tree = TREE.create("Maekar I"),
         nodes = TREE.getNodeList(tree),
@@ -11,8 +12,11 @@ function initialize() {
         zoom_in = document.getElementById("zoom_in"),
         zoom_out = document.getElementById("zoom_out");
 
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     canvas.addEventListener("click", function (event) {
+        // @ts-expect-error TS(2531): Object is possibly 'null'.
         var x = event.pageX - canvas.offsetLeft,
+            // @ts-expect-error TS(2531): Object is possibly 'null'.
             y = event.pageY - canvas.offsetTop;
         for (var i = 0; i < nodes.length; i++) {
             if (x > nodes[i].xPos && y > nodes[i].yPos && x < nodes[i].xPos + nodes[i].width && y < nodes[i].yPos + nodes[i].height) {
@@ -27,31 +31,39 @@ function initialize() {
         }
     }, false);
 
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     canvas.addEventListener("mousemove", function (event) {
+        // @ts-expect-error TS(2531): Object is possibly 'null'.
         var x = event.pageX - canvas.offsetLeft,
+            // @ts-expect-error TS(2531): Object is possibly 'null'.
             y = event.pageY - canvas.offsetTop;
         for (var i = 0; i < nodes.length; i++) {
             if (x > nodes[i].xPos && y > nodes[i].yPos && x < nodes[i].xPos + nodes[i].width && y < nodes[i].yPos + nodes[i].height) {
+                // @ts-expect-error TS(2531): Object is possibly 'null'.
                 canvas.style.cursor = "pointer";
                 break;
             }
             else {
+                // @ts-expect-error TS(2531): Object is possibly 'null'.
                 canvas.style.cursor = "auto";
             }
         }
     }, false);
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     add_child_button.addEventListener('click', function (event) {
         currNode.addChild(TREE.create("Child of " + currNode.text));
         TREE.clear(context);
         nodes = TREE.getNodeList(tree);
         TREE.draw(context, tree);
     }, false);
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     remove_node.addEventListener('click', function (event) {
         TREE.destroy(currNode);
         TREE.clear(context);
         nodes = TREE.getNodeList(tree);
         TREE.draw(context, tree);
     }, false);
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     zoom_in.addEventListener('click', function (event) {
         for (var i = 0; i < nodes.length; i++){
             nodes[i].width *= 1.05;
@@ -62,6 +74,7 @@ function initialize() {
         TREE.clear(context);
         TREE.draw(context, tree);
     }, false);
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     zoom_out.addEventListener('click', function (event) {
         for (var i = 0; i < nodes.length; i++){
             nodes[i].width = nodes[i].width * 0.95;
@@ -72,7 +85,9 @@ function initialize() {
         TREE.clear(context);
         TREE.draw(context, tree);
     }, false);
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     context.canvas.width = document.getElementById("main").offsetWidth;
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     context.canvas.height = document.getElementById("main").offsetHeight;
     populateDummyData(tree);
     nodes = TREE.getNodeList(tree);
@@ -80,18 +95,20 @@ function initialize() {
     maintree = tree;
 }
 
-function updatePage(tree) {
+function updatePage(tree: any) {
     var info_panel = document.getElementById("information_panel");
     var header = document.getElementById("header");
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     header.innerHTML = "Targaryen Family";
     var info_panel_html = "<ul>";
     info_panel_html += "<li>First Name: " +tree.text +"</li>";
     info_panel_html += "<li>Last Name: " +"Targaryen" +"</li>";
     info_panel_html += "</ul>";
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     info_panel.innerHTML = info_panel_html;
 }
 
-function populateDummyData(tree) {
+function populateDummyData(tree: any) {
     tree.selected(true);
     updatePage(tree);
     tree.addChild(TREE.create("Aerion"));
