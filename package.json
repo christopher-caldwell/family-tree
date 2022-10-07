@@ -1,9 +1,10 @@
 {
-  "name": "ftree",
+  "name": "@caldwell619/family-tree",
+  "version": "0.0.1-alpha.0",
   "scripts": {
     "lint": "eslint --ext .ts,.tsx src",
     "format": "prettier --write src",
-    "build": "tsc && npx tscpaths -p tsconfig.json -s src -o dist && cp src/style.css dist",
+    "build": "tsc && npx tscpaths -p tsconfig.json -s src -o dist",
     "build:watch": "nodemon --exec npm run build --watch src --ext .tsx,.ts --delay 2.5"
   },
   "devDependencies": {
@@ -14,5 +15,9 @@
     "prettier": "^2.7.1",
     "tscpaths": "^0.0.9",
     "typescript": "4.4.4"
-  }
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ]
 }
