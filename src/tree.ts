@@ -181,6 +181,7 @@ export class Tree<TData> {
     tree.parentTree = this
     tree.parentId = this.uid
     this.children.push(tree)
+    return tree
   }
 
   /**
@@ -243,7 +244,7 @@ export class Tree<TData> {
    * Clears the canvas.
    * @param context The 2-d context of an html canvas element.
    */
-  clear(context: any) {
+  clear(context: CanvasRenderingContext2D) {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
   }
 
@@ -261,7 +262,7 @@ export class Tree<TData> {
         topXAdjustment: 0,
         topYAdjustment: 20
       },
-      maxLevelHeight: any = [],
+      maxLevelHeight: number[] = [],
       maxLevelWidth = [],
       previousLevelTree: any = [],
       rootXOffset = 0,
@@ -271,7 +272,7 @@ export class Tree<TData> {
        * @param tree The tree.
        * @param level The current vertical level of the tree.
        */
-      setLevelHeight = function (tree: Tree<TData>, level: any) {
+      setLevelHeight = function (tree: Tree<TData>, level: number) {
         maxLevelHeight[level] = tree.height
       },
       /**
@@ -300,7 +301,7 @@ export class Tree<TData> {
        * @returns {*} The leftmost descendant if found, or null.
        */
       // @ts-expect-error TS(7023): 'getLeftMost' implicitly has return type 'any' bec... Remove this comment to see the full error message
-      getLeftMost = function (tree: Tree<TData>, level: any, maxlevel: any) {
+      getLeftMost = (tree: Tree<TData>, level: number, maxlevel: any) => {
         if (level >= maxlevel) return tree
         if (tree.numChildren() === 0) return null
         var n = tree.numChildren()

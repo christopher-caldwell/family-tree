@@ -1,10 +1,12 @@
 import { FC, useEffect, useRef } from 'react'
 import { getTree, Handlers } from '@caldwell619/family-tree'
 
+import { treeData } from './treeData'
+
 export const App: FC = () => {
   const handlers = useRef<Handlers>()
   useEffect(() => {
-    const { initialize, handlers: treeHandlers } = getTree()
+    const { initialize, handlers: treeHandlers } = getTree(treeData)
     handlers.current = treeHandlers
     initialize()
   }, [])

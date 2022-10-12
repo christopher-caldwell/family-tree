@@ -1,11 +1,13 @@
 import { Tree } from './tree'
 
-export const getTree = <TData>(canvasId = 'canvas') => {
+export const getTree = <TData>(treeData: TreeData[], canvasId = 'canvas') => {
   const canvas = document.getElementById(canvasId) as HTMLCanvasElement
   if (!canvas) throw new Error('Cannot find canvas element')
   const context = canvas.getContext('2d')
   if (!context) throw new Error('Cannot find canvas context')
-  const tree = new Tree<TData>({ text: 'Maekar I' })
+  const rootNode = treeData[0]
+  if(!rootNode) throw new Error('Cannot find root node')
+  const tree = new Tree<TData>({ text: rootNode.text })
 
   let nodes = tree.getNodeList(tree)
   let currNode = tree
@@ -88,24 +90,25 @@ export const getTree = <TData>(canvasId = 'canvas') => {
       nodes[i].width = nodes[i].width * step
       nodes[i].height = nodes[i].height * step
     }
-    tree.config.width *= 0.95
-    tree.config.height *= 0.95
+    tree.config.width *= step
+    tree.config.height *= step
     tree.clear(context)
     tree.draw(context, tree)
   }
 
   const initialize = () => {
-    // @ts-expect-error TS(2531): Object is possibly 'null'.
-    context.canvas.width = document.getElementById('main').offsetWidth
-    // @ts-expect-error TS(2531): Object is possibly 'null'.
-    context.canvas.height = document.getElementById('main').offsetHeight
-    populateDummyData(tree)
+    // TODO: change this
+    const main = document.getElementById('main')
+    if (main) {
+      context.canvas.width = main.offsetWidth
+      context.canvas.height = main.offsetHeight
+    }
+    populateDummyData(tree, rootNode.children || [])
     nodes = tree.getNodeList(tree)
     tree.draw(context, tree)
   }
 
   return {
-    tree,
     context,
     initialize,
     handlers: {
@@ -141,32 +144,44 @@ export const updatePage = (tree: any) => {
   info_panel.innerHTML = info_panel_html
 }
 
-export const populateDummyData = (tree: Tree<unknown>) => {
+interface TreeData {
+  text: string
+  children?: TreeData[]
+}
+export const populateDummyData = <TData>(tree: Tree<TData>, treeData: TreeData[]) => {
   tree.selected(true)
   updatePage(tree)
-  tree.addChild(new Tree({ text: 'Aerion' }))
-  tree.addChild(new Tree({ text: 'Daeron' }))
-  tree.addChild(new Tree({ text: 'Aemon' }))
-  tree.addChild(new Tree({ text: 'Aegon V' }))
-  tree.addChild(new Tree({ text: 'Rhae' }))
-  tree.addChild(new Tree({ text: 'Daella' }))
-  tree.getChildAt(0)?.addChild(new Tree({ text: 'Maegor' }))
-  tree.getChildAt(1)?.addChild(new Tree({ text: 'Vaella' }))
-  tree.getChildAt(3)?.addChild(new Tree({ text: 'Duncan' }))
-  tree.getChildAt(3)?.addChild(new Tree({ text: 'Jaehaerys II' }))
-  tree.getChildAt(3)?.addChild(new Tree({ text: 'Shaera' }))
-  tree.getChildAt(3)?.addChild(new Tree({ text: 'Daeron' }))
-  tree.getChildAt(3)?.addChild(new Tree({ text: 'Rhaelle' }))
-  tree.getDescendent(11)?.addChild(new Tree({ text: 'Aerys II' }))
-  tree.getDescendent(11)?.addChild(new Tree({ text: 'Rhaella' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Rhaegar' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Shaena' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Daeron' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Aegon' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Jaehaerys' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Viserys' }))
-  tree.getDescendent(15)?.addChild(new Tree({ text: 'Daenerys' }))
-  tree.getDescendent(17)?.addChild(new Tree({ text: 'Rhaenys' }))
-  tree.getDescendent(17)?.addChild(new Tree({ text: 'Aegon' }))
-  tree.getDescendent(23)?.addChild(new Tree({ text: 'Rhaego' }))
+  const renderChildren = (rootTree: Tree<TData>, children: TreeData[]) => {
+    for (const child of children) {
+      const newChild = rootTree.addChild(new Tree({ text: child.text }))
+      if (child.children) {
+        renderChildren(newChild, child.children)
+      }
+    }
+  }
+  renderChildren(tree, treeData)
+  // tree.addChild(new Tree({ text: 'Daeron' }))
+  // tree.addChild(new Tree({ text: 'Aemon' }))
+  // tree.addChild(new Tree({ text: 'Aegon V' }))
+  // tree.addChild(new Tree({ text: 'Rhae' }))
+  // tree.addChild(new Tree({ text: 'Daella' }))
+  // tree.getChildAt(0)?.addChild(new Tree({ text: 'Maegor' }))
+  // tree.getChildAt(1)?.addChild(new Tree({ text: 'Vaella' }))
+  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Duncan' }))
+  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Jaehaerys II' }))
+  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Shaera' }))
+  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Daeron' }))
+  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Rhaelle' }))
+  // tree.getDescendent(11)?.addChild(new Tree({ text: 'Aerys II' }))
+  // tree.getDescendent(11)?.addChild(new Tree({ text: 'Rhaella' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Rhaegar' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Shaena' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Daeron' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Aegon' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Jaehaerys' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Viserys' }))
+  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Daenerys' }))
+  // tree.getDescendent(17)?.addChild(new Tree({ text: 'Rhaenys' }))
+  // tree.getDescendent(17)?.addChild(new Tree({ text: 'Aegon' }))
+  // tree.getDescendent(23)?.addChild(new Tree({ text: 'Rhaego' }))
 }
