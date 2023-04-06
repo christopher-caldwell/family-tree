@@ -6,10 +6,11 @@ export const getTree = <TData>(treeData: TreeData[], canvasId = 'canvas') => {
   const context = canvas.getContext('2d')
   if (!context) throw new Error('Cannot find canvas context')
   const rootNode = treeData[0]
-  if(!rootNode) throw new Error('Cannot find root node')
+  if (!rootNode) throw new Error('Cannot find root node')
   const tree = new Tree<TData>({ text: rootNode.text })
 
   let nodes = tree.getNodeList(tree)
+  console.log(nodes)
   let currNode = tree
 
   /** Canvas onClick */
@@ -28,7 +29,7 @@ export const getTree = <TData>(treeData: TreeData[], canvasId = 'canvas') => {
         currNode = nodes[i]
         tree.clear(context)
         tree.draw(context, tree)
-        updatePage(currNode)
+        // updatePage(currNode)
         break
       }
     }
@@ -104,7 +105,7 @@ export const getTree = <TData>(treeData: TreeData[], canvasId = 'canvas') => {
       context.canvas.height = main.offsetHeight
     }
     populateDummyData(tree, rootNode.children || [])
-    nodes = tree.getNodeList(tree)
+    // nodes = tree.getNodeList(tree)
     tree.draw(context, tree)
   }
 
@@ -131,26 +132,11 @@ export interface Handlers {
   onRemove: () => void
 }
 
-export const updatePage = (tree: any) => {
-  var info_panel = document.getElementById('information_panel')
-  var header = document.getElementById('header')
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  header.innerHTML = 'Targaryen Family'
-  var info_panel_html = '<ul>'
-  info_panel_html += '<li>First Name: ' + tree.text + '</li>'
-  info_panel_html += '<li>Last Name: ' + 'Targaryen' + '</li>'
-  info_panel_html += '</ul>'
-  // @ts-expect-error TS(2531): Object is possibly 'null'.
-  info_panel.innerHTML = info_panel_html
-}
-
 interface TreeData {
   text: string
   children?: TreeData[]
 }
 export const populateDummyData = <TData>(tree: Tree<TData>, treeData: TreeData[]) => {
-  tree.selected(true)
-  updatePage(tree)
   const renderChildren = (rootTree: Tree<TData>, children: TreeData[]) => {
     for (const child of children) {
       const newChild = rootTree.addChild(new Tree({ text: child.text }))
@@ -160,28 +146,4 @@ export const populateDummyData = <TData>(tree: Tree<TData>, treeData: TreeData[]
     }
   }
   renderChildren(tree, treeData)
-  // tree.addChild(new Tree({ text: 'Daeron' }))
-  // tree.addChild(new Tree({ text: 'Aemon' }))
-  // tree.addChild(new Tree({ text: 'Aegon V' }))
-  // tree.addChild(new Tree({ text: 'Rhae' }))
-  // tree.addChild(new Tree({ text: 'Daella' }))
-  // tree.getChildAt(0)?.addChild(new Tree({ text: 'Maegor' }))
-  // tree.getChildAt(1)?.addChild(new Tree({ text: 'Vaella' }))
-  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Duncan' }))
-  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Jaehaerys II' }))
-  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Shaera' }))
-  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Daeron' }))
-  // tree.getChildAt(3)?.addChild(new Tree({ text: 'Rhaelle' }))
-  // tree.getDescendent(11)?.addChild(new Tree({ text: 'Aerys II' }))
-  // tree.getDescendent(11)?.addChild(new Tree({ text: 'Rhaella' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Rhaegar' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Shaena' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Daeron' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Aegon' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Jaehaerys' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Viserys' }))
-  // tree.getDescendent(15)?.addChild(new Tree({ text: 'Daenerys' }))
-  // tree.getDescendent(17)?.addChild(new Tree({ text: 'Rhaenys' }))
-  // tree.getDescendent(17)?.addChild(new Tree({ text: 'Aegon' }))
-  // tree.getDescendent(23)?.addChild(new Tree({ text: 'Rhaego' }))
 }
